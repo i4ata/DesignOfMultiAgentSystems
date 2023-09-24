@@ -9,7 +9,7 @@ turtles-own
 globals
 [
   candidates         ;; list of possible candidates
-  voter turnout      ;; the percentage of voters that voted
+  voter-turnout      ;; the percentage of voters that voted
 ]
 
 to setup
@@ -18,6 +18,11 @@ to setup
   create-turtles total-people
   [
     setxy random-xcor random-ycor
+    set polposition []
+    repeat dimensions - 2
+    [
+      set polposition insert-item 0 polposition random-xcor
+    ]
     set color blue
     set isCandidate? false
     set satisfaction 100
@@ -27,6 +32,8 @@ to setup
     set color red
     set isCandidate? true
   ]
+  set candidates turtles with [isCandidate?]
+  set voter-turnout 100
   reset-ticks
 end
 
@@ -35,13 +42,47 @@ to go
   [
     calculate-utilities
     vote
+    evaluate
     move
   ]
   tick
 end
 
-to calculate-utilities
+to-report calculate-distance [#current-candidate]
 
+  if dimensions = 2
+  [
+    report distance #current-candidate
+  ]
+  let distance-val 0
+  let current-dim 0
+  repeat dimensions
+  [
+    (ifelse current-dim = 0
+    [
+      set distance-val distance-val + (xcor - [xcor] of #current-candidate ) ^ 2
+    ]
+    current-dim = 1
+    [
+      set distance-val distance-val + (ycor - [ycor] of #current-candidate ) ^ 2
+    ]
+    [
+      set distance-val distance-val + (item (current-dim - 2) polposition - [item (current-dim - 2) polposition] of #current-candidate ) ^ 2
+    ]
+    )
+    set current-dim current-dim + 1
+  ]
+  report sqrt distance-val
+end
+
+to-report calculate-utility [#current-candidate]
+  let dist-val calculate-distance #current-candidate
+  report ( repulsion-distance - dist-val ) / ( ( 1 + dist-val ) ^ 2 )
+end
+
+to calculate-utilities
+  set utilities []
+  foreach candidates [ candidate -> set utilities insert-item 0 utilities calculate-utility candidate]
 end
 
 to vote
@@ -52,6 +93,10 @@ to vote
   [
     ;;election-type-2
   ]
+end
+
+to evaluate
+
 end
 
 to move
@@ -173,6 +218,36 @@ election-type
 election-type
 "majority" "ranked-voting"
 0
+
+SLIDER
+19
+490
+191
+523
+dimensions
+dimensions
+2
+10
+2.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+22
+537
+194
+570
+repulsion-distance
+repulsion-distance
+1
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
