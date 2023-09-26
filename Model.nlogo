@@ -8,8 +8,10 @@ turtles-own
 
 globals
 [
-  candidates         ;; list of possible candidates
-  voter-turnout      ;; the percentage of voters that voted
+  candidates            ;; list of possible candidates (stores the number of the turtle)
+  voter-turnout         ;; the percentage of voters that voted
+  votes-per-candidate   ;; list of number of votes per candidate for the last election (this influences the movement and voting behaviour of voters)
+  winners               ;; list of winning candidates (identified by the number of the turtle)
 ]
 
 to setup
@@ -32,7 +34,12 @@ to setup
     set color red
     set isCandidate? true
   ]
-  set candidates turtles with [isCandidate?]
+  set candidates [who] of turtles with [isCandidate?]
+  set votes-per-candidate []
+  repeat number-candidates
+  [
+    set votes-per-candidate lput 1 votes-per-candidate
+  ]
   set voter-turnout 100
   reset-ticks
 end
@@ -42,6 +49,11 @@ to go
   [
     calculate-utilities
     vote
+
+  ]
+  determine-voting-winners
+  ask turtles with [not isCandidate?]
+  [
     evaluate
     move
   ]
@@ -75,32 +87,130 @@ to-report calculate-distance [#current-candidate]
   report sqrt distance-val
 end
 
-to-report calculate-utility [#current-candidate]
+to-report calculate-satisfaction [#current-candidate]
   let dist-val calculate-distance #current-candidate
   report ( repulsion-distance - dist-val ) / ( ( 1 + dist-val ) ^ 2 )
 end
 
-to calculate-utilities
-  set utilities []
-  foreach candidates [ candidate -> set utilities insert-item 0 utilities calculate-utility candidate]
+to-report calculate-utility [#current-candidate #last-vote-percentage]
+  let dist-val calculate-distance #current-candidate
+  report calculate-satisfaction #current-candidate * #last-vote-percentage
 end
 
+to calculate-utilities
+  set utilities []
+  let curr-idx 0
+  let total-votes sum votes-per-candidate
+  repeat number-candidates
+  [
+    let candidate one-of turtles with [who = item curr-idx candidates]
+    let votes item curr-idx votes-per-candidate
+    set utilities lput (calculate-utility candidate (votes / total-votes)) utilities
+    set curr-idx curr-idx + 1
+  ]
+end
+
+;; This function is called 'globally'
+to determine-voting-winners
+  ifelse election-type = "majority"
+  [
+    ;;election-type-1
+    ;;use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
+    ;; update voter-turnout
+    ;; potentially update votes-per-candidate here
+    set winners (list item 0 candidates) ;; delete this, I only added this for testing purposes
+  ]
+  [
+    ;;election-type-2
+    ;;use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
+    ;; update voter-turnout
+    ;; potentially update votes-per-candidate here
+  ]
+end
+
+;; This function is called per agent
 to vote
   ifelse election-type = "majority"
   [
     ;;election-type-1
+    ;;give vote taking utility of each candidate into account (using utilities)
+    ;; maybe use satisfaction to determine if the voter votes for someone if utilities and satisfaction are too low
+    ;;collect votes somewhere to be able to determine the winner later
+    ;; potentially update votes-per-candidate here
   ]
   [
     ;;election-type-2
+    ;;give vote taking utility of each candidate into account (using utilities)
+    ;; maybe use satisfaction to determine if the voter votes for someone if utilities and satisfaction are too low
+    ;;collect votes somewhere to be able to determine the winner later
+    ;; potentially update votes-per-candidate here
   ]
 end
 
 to evaluate
+  let newSatisfaction 0
+  let current-winner 0
+  repeat winning-candidates
+  [
+    let current-candidate one-of turtles with [who = item current-winner winners]
+    set newSatisfaction ( calculate-satisfaction current-candidate / winning-candidates ) + newSatisfaction
+    set current-winner current-winner + 1
+  ]
+  set satisfaction satisfaction + (newSatisfaction - satisfaction) * 0.2
+end
 
+to-report calculate-direction-vector [#current-candidate]
+  let direction-vector []
+  set direction-vector lput (xcor - [xcor] of #current-candidate ) direction-vector
+  set direction-vector lput (ycor - [ycor] of #current-candidate ) direction-vector
+  let current-dim 0
+  repeat dimensions - 2
+  [
+    set direction-vector lput (item current-dim polposition - [item current-dim polposition] of #current-candidate ) direction-vector
+    set current-dim current-dim + 1
+  ]
+  report direction-vector
+end
+
+to-report calculate-normalized-direction-vector [#current-candidate]
+  let direction-vector calculate-direction-vector #current-candidate
+  let magnitude calculate-distance #current-candidate
+  let normalized-direction-vector []
+  foreach direction-vector [ number -> set normalized-direction-vector lput (number / magnitude) normalized-direction-vector ]
+  report normalized-direction-vector
 end
 
 to move
-
+ let current-index 0
+ let all-utilities 0
+ foreach utilities [ utility -> set all-utilities all-utilities + abs utility ]
+ let movement-vector []
+ repeat dimensions
+ [
+    set movement-vector lput 0 movement-vector
+ ]
+ repeat number-candidates
+ [
+    let current-candidate one-of turtles with [who = item current-index candidates]
+    let dir-vector calculate-normalized-direction-vector current-candidate
+    let utility-vector []
+    foreach dir-vector [ dim -> set utility-vector lput ( dim / item current-index utilities ) utility-vector ]
+    let current-dim 0
+    repeat dimensions
+    [
+      set movement-vector replace-item current-dim movement-vector (item current-dim movement-vector + ( item current-dim dir-vector * item current-index utilities / all-utilities * movement-speed ) )
+      set current-dim current-dim + 1
+    ]
+    set current-index current-index + 1
+ ]
+ set xcor min list (max-pxcor + 0.499) max list (min-pxcor - 0.5) (xcor + item 0 movement-vector)
+ set ycor min list (max-pycor + 0.499) max list (min-pycor - 0.5) (ycor + item 1 movement-vector)
+ let curr-dim 2
+ repeat dimensions - 2
+ [
+    set polposition replace-item (curr-dim - 2) polposition (item (curr-dim - 2) polposition + item curr-dim movement-vector )
+    set curr-dim curr-dim + 1
+ ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -243,11 +353,77 @@ repulsion-distance
 repulsion-distance
 1
 100
-50.0
+10.0
 1
 1
 NIL
 HORIZONTAL
+
+SLIDER
+29
+598
+201
+631
+movement-speed
+movement-speed
+0.1
+2
+1.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+28
+653
+200
+686
+change-satisfaction
+change-satisfaction
+0
+1
+0.1
+0.1
+1
+NIL
+HORIZONTAL
+
+PLOT
+938
+116
+1200
+302
+Voter turnout
+NIL
+Voter-turnout
+0.0
+100.0
+0.0
+100.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot voter-turnout"
+
+PLOT
+939
+378
+1202
+558
+Average Satisfaction
+NIL
+NIL
+0.0
+10.0
+0.0
+100.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [satisfaction] of turtles with [not isCandidate?]"
 
 @#$#@#$#@
 ## WHAT IS IT?
