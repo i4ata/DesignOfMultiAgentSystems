@@ -4,6 +4,7 @@ turtles-own
   polposition        ;; the political position (if more than 2 dimensions are used)
   satisfaction       ;; satisfaction with current government
   utilities          ;; list of likelihood of choosing candidates
+  votes-received     ;; number of votes received by a candidate (the name "votes" occupied by the 'evaluate' method)
 ]
 
 globals
@@ -112,13 +113,17 @@ end
 
 ;; This function is called 'globally'
 to determine-voting-winners
-  ifelse election-type = "majority"
+  ifelse election-type = "plurality"
   [
     ;;election-type-1
     ;;use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
     ;; update voter-turnout
     ;; potentially update votes-per-candidate here
-    set winners (list item 0 candidates) ;; delete this, I only added this for testing purposes
+    ;; set winners (list item 0 candidates) ;; delete this, I only added this for testing purposes
+
+    let candidate-agentset turtles with [ member? who candidates ]  ;; create an agentset of candidate turtles
+    let max-votes max [votes-received] of candidate-agentset
+    set winners candidate-agentset with [ votes-received = max-votes ]
   ]
   [
     ;;election-type-2
@@ -130,13 +135,17 @@ end
 
 ;; This function is called per agent
 to vote
-  ifelse election-type = "majority"
+  ifelse election-type = "plurality"
   [
     ;;election-type-1
     ;;give vote taking utility of each candidate into account (using utilities)
     ;; maybe use satisfaction to determine if the voter votes for someone if utilities and satisfaction are too low
     ;;collect votes somewhere to be able to determine the winner later
     ;; potentially update votes-per-candidate here
+
+    let candidate-agentset turtles with [ member? who candidates ]  ;; create an agentset of candidate turtles
+    let chosen-candidate max-one-of candidate-agentset [ utilities ]
+    ask chosen-candidate [ set votes-received votes-received + 1 ]
   ]
   [
     ;;election-type-2
@@ -152,7 +161,11 @@ to evaluate
   let current-winner 0
   repeat winning-candidates
   [
-    let current-candidate one-of turtles with [who = item current-winner winners]
+    ;; let current-candidate one-of turtles with [who = item current-winner winners]
+
+    let winners-list [ who ] of winners  ;; convert winners agentset to a list of who numbers
+    let current-candidate one-of turtles with [ who = item current-winner winners-list ]
+
     set newSatisfaction ( calculate-satisfaction current-candidate / winning-candidates ) + newSatisfaction
     set current-winner current-winner + 1
   ]
@@ -298,7 +311,7 @@ number-candidates
 number-candidates
 2
 10
-2.0
+6.0
 1
 1
 NIL
@@ -326,8 +339,8 @@ CHOOSER
 447
 election-type
 election-type
-"majority" "ranked-voting"
-0
+"majority" "ranked-voting" "plurality"
+2
 
 SLIDER
 19
@@ -338,7 +351,7 @@ dimensions
 dimensions
 2
 10
-2.0
+8.0
 1
 1
 NIL
@@ -353,7 +366,7 @@ repulsion-distance
 repulsion-distance
 1
 100
-10.0
+67.0
 1
 1
 NIL
@@ -368,7 +381,7 @@ movement-speed
 movement-speed
 0.1
 2
-1.0
+1.6
 0.1
 1
 NIL
@@ -383,7 +396,7 @@ change-satisfaction
 change-satisfaction
 0
 1
-0.1
+1.0
 0.1
 1
 NIL
