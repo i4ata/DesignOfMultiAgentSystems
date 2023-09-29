@@ -1,233 +1,22 @@
-breed [candidates candidate]
-breed [voters voter]
-
-candidates-own [
-  polposition        ;; the political position (if more than 2 dimensions are used)
-  votes-received     ;; number of votes received by a candidate from the last election
-  winner?            ;; won last election or not
-]
-
-voters-own [
-  polposition        ;; the political position (if more than 2 dimensions are used)
-  satisfaction       ;; satisfaction with current government
-  utilities          ;; list of likelihood of choosing candidates
-]
-
-globals
-[
-  voter-turnout         ;; the percentage of voters that voted
-  total-votes           ;; the total number of votes
-]
+breed [as a]
+breed [bs b]
 
 to setup
   clear-all
+  create-as 2 [set color white]
+  create-bs 2 [set color green]
 
-  ;; if the candidates are created first, their 'who' values will start at 0
-  ;; otherwise, they will start at `number-voters`, which would break everything
-  create-candidates number-candidates
-  [
-    setxy random-xcor random-ycor
-    set polposition []
-    repeat dimensions - 2 [set polposition insert-item 0 polposition random-xcor]
-    set color red
-    set winner? false
-    set votes-received 1
-  ]
-
-  create-voters number-voters
-  [
-    setxy random-xcor random-ycor
-    set polposition []
-    repeat dimensions - 2 [set polposition insert-item 0 polposition random-xcor]
-    set color blue
-    set satisfaction 100
-    set utilities []
-    repeat number-candidates [set utilities lput 0 utilities]
-  ]
-
-  set voter-turnout 100
+  ask as [fd 5]
+  ask bs [fd 5]
   reset-ticks
 end
 
-;; for tests
-to run-election
-  set total-votes sum [votes-received] of candidates
-  ask voters
-  [
-    calculate-utilities
-    ;; ask candidates [set votes-received 1] ;; reset
-    vote
-  ]
+to check
 
-  determine-voting-winners
-
-  ask voters
-  [
-    evaluate
-    move
-  ]
-
-end
-
-to go
-  run-election
-  tick
-end
-
-;; called for each candidate by each voter
-to-report calculate-distance
-
-  if dimensions = 2 [ report distance myself ]
-  let distance-val 0
-  let current-dim 0
-  repeat dimensions
-  [
-    (
-      ifelse current-dim = 0 [ set distance-val distance-val + ([xcor] of myself - xcor) ^ 2 ]
-             current-dim = 1 [ set distance-val distance-val + ([ycor] of myself - ycor) ^ 2 ]
-                             [ set distance-val distance-val + (item (current-dim - 2) ([polposition] of myself) - item (current-dim - 2) polposition) ^ 2 ]
-    )
-    set current-dim current-dim + 1
-  ]
-  report sqrt distance-val
-end
-
-;; called for each candidate by each voter
-to-report calculate-satisfaction
-  let dist-val calculate-distance
-  report ( repulsion-distance - dist-val ) / ( ( 1 + dist-val ) ^ 2 )
-end
-
-;; called per voter
-to calculate-utilities
-
-  let updated-utilities []
-  repeat number-candidates [set updated-utilities lput 0 updated-utilities]
-  ;; Compute the utility of each candidate
-  ask candidates
-  [
-    let new-utility calculate-satisfaction * (votes-received / total-votes)
-    set updated-utilities replace-item who updated-utilities new-utility
-  ]
-  set utilities updated-utilities
-
-end
-
-;; This function is called 'globally'
-to determine-voting-winners
-  ifelse election-type = "plurality"
-  [
-    ;;election-type-1
-    ;;use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
-    ;; update voter-turnout
-    ;; potentially update votes-per-candidate here
-    ;; set winners (list item 0 candidates) ;; delete this, I only added this for testing purposes
-
-    ;; the `winning-candidates` candidates with the most votes are the election winners
-    let winners max-n-of winning-candidates candidates [ votes-received ]
-    ask winners [set winner? true]
-
-  ]
-  [
-    ;;election-type-2
-    ;;use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
-    ;; update voter-turnout
-    ;; potentially update votes-per-candidate here
-  ]
-end
-
-;; This function is called per voter
-to vote
-  ifelse election-type = "plurality"
-  [
-    ;;election-type-1
-    ;;give vote taking utility of each candidate into account (using utilities)
-    ;; maybe use satisfaction to determine if the voter votes for someone if utilities and satisfaction are too low
-    ;;collect votes somewhere to be able to determine the winner later
-    ;; potentially update votes-per-candidate here
-
-    let max-utility max utilities
-    let own-utilities utilities
-    let chosen-candidate candidates with [who = position max-utility own-utilities] ;; the 'who' of the candidate we are voting for is the argmax of the utilities
-    ask chosen-candidate [ set votes-received votes-received + 1 ]
-  ]
-  [
-    ;;election-type-2
-    ;;give vote taking utility of each candidate into account (using utilities)
-    ;; maybe use satisfaction to determine if the voter votes for someone if utilities and satisfaction are too low
-    ;;collect votes somewhere to be able to determine the winner later
-    ;; potentially update votes-per-candidate here
-  ]
-end
-
-;; called per voter
-to evaluate
-
-  let newSatisfaction 0
-  let winners candidates with [ winner? = true ]
-
-  ;; calculate change in voter satisfaction for each winner
-  ask winners
-  [
-    set newSatisfaction (calculate-satisfaction / winning-candidates) + newSatisfaction
-  ]
-
-  set satisfaction satisfaction + (newSatisfaction - satisfaction) * 0.2
-
-end
-
-;; called for each candidate by each voter
-to-report calculate-direction-vector
-  let direction-vector []
-  set direction-vector lput ([xcor] of myself - xcor) direction-vector
-  set direction-vector lput ([ycor] of myself - ycor) direction-vector
-  let current-dim 0
-  repeat dimensions - 2
-  [
-    set direction-vector lput (item current-dim ([polposition] of myself) - item current-dim polposition) direction-vector
-    set current-dim current-dim + 1
-  ]
-  report direction-vector
-end
-
-;; called for each candidate by each voter
-to-report calculate-normalized-direction-vector
-  let direction-vector calculate-direction-vector
-  let magnitude calculate-distance
-  let normalized-direction-vector []
-  foreach direction-vector [ number -> set normalized-direction-vector lput (number / magnitude) normalized-direction-vector ]
-  report normalized-direction-vector
-end
-
-;; called for each voter
-to move
-
-  let all-utilities sum (map abs utilities)
-  let movement-vector []
-  repeat dimensions [ set movement-vector lput 0 movement-vector ]
-
-  ask candidates
-  [
-    let dir-vector calculate-normalized-direction-vector
-    let utility-vector []
-    foreach dir-vector [ dim -> set utility-vector lput (dim / item who ([utilities] of myself) ) utility-vector ]
-    let current-dim 0
-    repeat dimensions
-    [
-      ;; the line below is definitely wrong since the movement vector is concstantly overwritten by the new candidate
-      ;; that way only the last candidate has an effect of the movement vector
-      set movement-vector replace-item current-dim movement-vector ( item current-dim movement-vector + ( item current-dim dir-vector * item who ([utilities] of myself) / all-utilities * movement-speed ) )
-      set current-dim current-dim + 1
+  ask as [
+    ask bs [
+      show self
     ]
-  ]
-
-  set xcor min list (max-pxcor + 0.499) max list (min-pxcor - 0.5) (xcor + item 0 movement-vector)
-  set ycor min list (max-pycor + 0.499) max list (min-pycor - 0.5) (ycor + item 1 movement-vector)
-  let curr-dim 2
-  repeat dimensions - 2
-  [
-    set polposition replace-item (curr-dim - 2) polposition (item (curr-dim - 2) polposition + item curr-dim movement-vector )
-    set curr-dim curr-dim + 1
   ]
 
 end
@@ -246,8 +35,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-0
-0
+1
+1
 1
 -16
 16
@@ -261,25 +50,8 @@ ticks
 
 BUTTON
 81
-106
-144
-139
-NIL
-go
-T
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-83
 31
-146
+154
 64
 NIL
 setup
@@ -293,156 +65,22 @@ NIL
 NIL
 1
 
-SLIDER
-23
-197
-195
-230
-number-voters
-number-voters
-10
-100
-10.0
-1
-1
+BUTTON
+85
+115
+159
+148
 NIL
-HORIZONTAL
-
-SLIDER
-20
-262
-192
-295
-number-candidates
-number-candidates
-2
-10
-2.0
-1
-1
+check\n
 NIL
-HORIZONTAL
-
-SLIDER
-25
-324
-197
-357
-winning-candidates
-winning-candidates
 1
-number-candidates - 1
-1.0
-1
-1
-NIL
-HORIZONTAL
-
-CHOOSER
-28
-402
-166
-447
-election-type
-election-type
-"majority" "ranked-voting" "plurality"
-2
-
-SLIDER
-19
-490
-191
-523
-dimensions
-dimensions
-2
-10
-4.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-22
-537
-194
-570
-repulsion-distance
-repulsion-distance
-1
-100
-40.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-29
-598
-201
-631
-movement-speed
-movement-speed
-0.1
-2
-1.6
-0.1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-28
-653
-200
-686
-change-satisfaction
-change-satisfaction
-0
-1
-1.0
-0.1
-1
-NIL
-HORIZONTAL
-
-PLOT
-938
-116
-1200
-302
-Voter turnout
-NIL
-Voter-turnout
-0.0
-100.0
-0.0
-100.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot voter-turnout"
-
-PLOT
-939
-378
-1202
-558
-Average Satisfaction
+T
+OBSERVER
 NIL
 NIL
-0.0
-10.0
-0.0
-100.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [satisfaction] of voters"
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
