@@ -172,7 +172,7 @@ to evaluate
     set newSatisfaction (calculate-satisfaction / winning-candidates) + newSatisfaction
   ]
 
-  set satisfaction satisfaction + (newSatisfaction - satisfaction) * 0.2
+  set satisfaction satisfaction + (newSatisfaction - satisfaction) * change-satisfaction
 
 end
 
@@ -387,7 +387,7 @@ movement-speed
 movement-speed
 0.1
 2
-1.6
+0.9
 0.1
 1
 NIL
@@ -402,7 +402,7 @@ change-satisfaction
 change-satisfaction
 0
 1
-1.0
+0.2
 0.1
 1
 NIL
