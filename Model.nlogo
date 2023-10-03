@@ -198,13 +198,11 @@ to move
     let utility-vector []
     foreach dir-vector [ dim -> set utility-vector lput (dim / item who ([utilities] of myself) ) utility-vector ]
     let current-dim 0
-    repeat dimensions
-    [
-      ;; the line below is definitely wrong since the movement vector is concstantly overwritten by the new candidate
-      ;; that way only the last candidate has an effect of the movement vector
-      set movement-vector replace-item current-dim movement-vector ( item current-dim movement-vector + ( item current-dim dir-vector * item who ([utilities] of myself) / all-utilities * movement-speed ) )
-      set current-dim current-dim + 1
-    ]
+
+    ;; movement-vector += dir-vector * change
+    let change (item who ([utilities] of myself) / all-utilities * movement-speed)
+    set movement-vector (map + movement-vector (map [x -> x * change] dir-vector))
+
   ]
 
   set xcor min list (max-pxcor + 0.499) max list (min-pxcor - 0.5) (xcor + item 0 movement-vector)
