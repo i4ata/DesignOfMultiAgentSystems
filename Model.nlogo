@@ -76,20 +76,10 @@ end
 
 ;; called for each candidate by each voter
 to-report calculate-distance
+  ;; in python that would be the same as np.sqrt(distance_between_them ** 2 + np.sum(polposition1 - polposition2)**2)
+  ;; the output is exactly the same as before
+  report sqrt ( (distance myself ^ 2) + sum (map [ x -> x ^ 2] (map - ([polposition] of myself) (polposition))))
 
-  if dimensions = 2 [ report distance myself ]
-  let distance-val 0
-  let current-dim 0
-  repeat dimensions
-  [
-    (
-      ifelse current-dim = 0 [ set distance-val distance-val + ([xcor] of myself - xcor) ^ 2 ]
-             current-dim = 1 [ set distance-val distance-val + ([ycor] of myself - ycor) ^ 2 ]
-                             [ set distance-val distance-val + (item (current-dim - 2) ([polposition] of myself) - item (current-dim - 2) polposition) ^ 2 ]
-    )
-    set current-dim current-dim + 1
-  ]
-  report sqrt distance-val
 end
 
 ;; called for each candidate by each voter
@@ -167,10 +157,7 @@ to evaluate
   let winners candidates with [ winner? = true ]
 
   ;; calculate change in voter satisfaction for each winner
-  ask winners
-  [
-    set newSatisfaction (calculate-satisfaction / winning-candidates) + newSatisfaction
-  ]
+  ask winners [ set newSatisfaction (calculate-satisfaction / winning-candidates) + newSatisfaction ]
 
   set satisfaction satisfaction + (newSatisfaction - satisfaction) * change-satisfaction
 
@@ -178,15 +165,14 @@ end
 
 ;; called for each candidate by each voter
 to-report calculate-direction-vector
-  let direction-vector []
-  set direction-vector lput ([xcor] of myself - xcor) direction-vector
-  set direction-vector lput ([ycor] of myself - ycor) direction-vector
-  let current-dim 0
-  repeat dimensions - 2
-  [
-    set direction-vector lput (item current-dim ([polposition] of myself) - item current-dim polposition) direction-vector
-    set current-dim current-dim + 1
-  ]
+
+  ;; my polposition - polposition
+  let direction-vector (map - ([polposition] of myself) polposition)
+
+  ;; add the x and y at the beginning
+  set direction-vector fput ([ycor] of myself - ycor) direction-vector
+  set direction-vector fput ([xcor] of myself - xcor) direction-vector
+
   report direction-vector
 end
 
@@ -224,11 +210,9 @@ to move
   set xcor min list (max-pxcor + 0.499) max list (min-pxcor - 0.5) (xcor + item 0 movement-vector)
   set ycor min list (max-pycor + 0.499) max list (min-pycor - 0.5) (ycor + item 1 movement-vector)
   let curr-dim 2
-  repeat dimensions - 2
-  [
-    set polposition replace-item (curr-dim - 2) polposition (item (curr-dim - 2) polposition + item curr-dim movement-vector )
-    set curr-dim curr-dim + 1
-  ]
+
+  ;; same as: polposition + movement-vector[2:]
+  set polposition (map + polposition (but-first (but-first movement-vector)))
 
 end
 @#$#@#$#@
