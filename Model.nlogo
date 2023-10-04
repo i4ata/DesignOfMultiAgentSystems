@@ -45,7 +45,7 @@ to setup
     repeat number-candidates [set utilities lput 0 utilities]
   ]
 
-  set voter-turnout 100
+  set voter-turnout 0
   reset-ticks
 end
 
@@ -53,6 +53,7 @@ end
 to reset
 
   ask candidates [set winner? false]
+  set voter-turnout 0
 
 end
 
@@ -124,10 +125,11 @@ to determine-voting-winners
 
   ]
   [
-    ;;election-type-2
-    ;;use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
-    ;; update voter-turnout
-    ;; potentially update votes-per-candidate here
+    ;;election-type-2: Limited voting
+    ;; the winners are the 'winning-candidates' candidates with the most votes
+    let winners max-n-of winning-candidates candidates [ votes-received ]
+    ask winners [ set winner? true ]
+
   ]
 end
 
@@ -147,11 +149,23 @@ to vote
     ask chosen-candidate [ set votes-received votes-received + 1 ]
   ]
   [
-    ;;election-type-2
-    ;;give vote taking utility of each candidate into account (using utilities)
-    ;; maybe use satisfaction to determine if the voter votes for someone if utilities and satisfaction are too low
-    ;;collect votes somewhere to be able to determine the winner later
-    ;; potentially update votes-per-candidate here
+    ;;election-type-2: Limited voting
+
+    ;; sort candidates by corresponding utilities decreasing
+    let candidates-ordered sort-by [[c1 c2] -> (item ([who] of c1) utilities) > (item ([who] of c2) utilities)] candidates
+
+    ;; take the first 'allowed-votes-per-election' candidates
+    let best-n-candidates sublist candidates-ordered 0 allowed-votes-per-election
+
+    ;; take only the candidates with which the voter is satisfied enough
+    let filtered-candidates filter [c -> item ([who] of c) utilities > satisfaction] best-n-candidates
+
+    ;; if there is someone to vote for, vote and increment the vote-turnout
+    if not empty? filtered-candidates
+    [
+      ask turtle-set filtered-candidates [set votes-received votes-received + 1]
+      set voter-turnout voter-turnout + 100 / number-voters
+    ]
   ]
 end
 
@@ -289,7 +303,7 @@ number-voters
 number-voters
 10
 100
-10.0
+20.0
 1
 1
 NIL
@@ -304,7 +318,7 @@ number-candidates
 number-candidates
 2
 10
-2.0
+4.0
 1
 1
 NIL
@@ -319,7 +333,7 @@ winning-candidates
 winning-candidates
 2
 number-candidates - 1
-1.0
+3.0
 1
 1
 NIL
@@ -333,7 +347,7 @@ CHOOSER
 election-type
 election-type
 "majority" "ranked-voting" "plurality" "limited"
-2
+3
 
 SLIDER
 19
@@ -444,13 +458,13 @@ Limited voting parameters
 SLIDER
 552
 571
-779
+784
 604
 allowed-votes-per-election
 allowed-votes-per-election
 0
-number-candidates - 1
-1.0
+winning-candidates - 1
+2.0
 1
 1
 NIL
