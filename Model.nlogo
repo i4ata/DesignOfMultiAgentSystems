@@ -49,15 +49,19 @@ to setup
   reset-ticks
 end
 
+;; run this inbetween elections
+to reset
+
+  ask candidates [set winner? false]
+
+end
+
 ;; for tests
 to run-election
   set total-votes sum [votes-received] of candidates
-  ask voters
-  [
-    calculate-utilities
-    ;; ask candidates [set votes-received 1] ;; reset
-    vote
-  ]
+  ask voters [calculate-utilities]
+  ask candidates [set votes-received 1]
+  ask voters [vote]
 
   determine-voting-winners
 
@@ -70,6 +74,7 @@ to run-election
 end
 
 to go
+  reset
   run-election
   tick
 end
@@ -113,8 +118,8 @@ to determine-voting-winners
     ;; potentially update votes-per-candidate here
     ;; set winners (list item 0 candidates) ;; delete this, I only added this for testing purposes
 
-    ;; the `winning-candidates` candidates with the most votes are the election winners
-    let winners max-n-of winning-candidates candidates [ votes-received ]
+    ;; the candidate with the most votes is the election winner
+    let winners max-one-of candidates [ votes-received ]
     ask winners [set winner? true]
 
   ]
@@ -199,7 +204,7 @@ to move
     foreach dir-vector [ dim -> set utility-vector lput (dim / item who ([utilities] of myself) ) utility-vector ]
     let current-dim 0
 
-    ;; movement-vector += dir-vector * change
+    ;; movement-vector += dir-vector * utility / all_utilities * movement-speed
     let change (item who ([utilities] of myself) / all-utilities * movement-speed)
     set movement-vector (map + movement-vector (map [x -> x * change] dir-vector))
 
@@ -306,13 +311,13 @@ NIL
 HORIZONTAL
 
 SLIDER
-25
-324
-197
-357
+558
+512
+730
+545
 winning-candidates
 winning-candidates
-1
+2
 number-candidates - 1
 1.0
 1
@@ -327,7 +332,7 @@ CHOOSER
 447
 election-type
 election-type
-"majority" "ranked-voting" "plurality"
+"majority" "ranked-voting" "plurality" "limited"
 2
 
 SLIDER
@@ -425,6 +430,31 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [satisfaction] of voters"
+
+TEXTBOX
+607
+472
+757
+502
+Limited voting parameters
+12
+0.0
+1
+
+SLIDER
+552
+571
+779
+604
+allowed-votes-per-election
+allowed-votes-per-election
+0
+number-candidates - 1
+1.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
