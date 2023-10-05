@@ -113,19 +113,15 @@ end
 to determine-voting-winners
   ifelse election-type = "plurality"
   [
-    ;;election-type-1
-    ;;use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
-    ;; update voter-turnout
-    ;; potentially update votes-per-candidate here
-    ;; set winners (list item 0 candidates) ;; delete this, I only added this for testing purposes
+    ;; election-type-1: Plurality voting
+    ;; use the votes to determine the winner/ winners depending on winning-candidates and set the winners list
 
     ;; the candidate with the most votes is the election winner
     let winners max-one-of candidates [ votes-received ]
     ask winners [set winner? true]
-
   ]
   [
-    ;;election-type-2: Limited voting
+    ;; election-type-2: Limited voting
     ;; the winners are the 'winning-candidates' candidates with the most votes
     let winners max-n-of winning-candidates candidates [ votes-received ]
     ask winners [ set winner? true ]
@@ -137,19 +133,28 @@ end
 to vote
   ifelse election-type = "plurality"
   [
-    ;;election-type-1
-    ;;give vote taking utility of each candidate into account (using utilities)
-    ;; maybe use satisfaction to determine if the voter votes for someone if utilities and satisfaction are too low
-    ;;collect votes somewhere to be able to determine the winner later
-    ;; potentially update votes-per-candidate here
+    ;; election-type-1: Plurality voting
 
+    ;; determine the candidate with the highest utility for this voter
     let max-utility max utilities
     let own-utilities utilities
     let chosen-candidate candidates with [who = position max-utility own-utilities] ;; the 'who' of the candidate we are voting for is the argmax of the utilities
-    ask chosen-candidate [ set votes-received votes-received + 1 ]
+
+    ;; use satisfaction to determine if the voter votes for someone
+    let chosen-satisfaction first [calculate-satisfaction] of chosen-candidate
+
+    if chosen-satisfaction >= satisfaction
+    [
+      ;; determine the candidate with the highest utility for this voter
+       ask chosen-candidate [ set votes-received votes-received + 1 ]
+
+       ;; update the voter-turnout
+       set voter-turnout voter-turnout + 100 / number-voters
+    ]
+
   ]
   [
-    ;;election-type-2: Limited voting
+    ;; election-type-2: Limited voting
 
     ;; sort candidates by corresponding utilities decreasing
     let candidates-ordered sort-by [[c1 c2] -> (item ([who] of c1) utilities) > (item ([who] of c2) utilities)] candidates
@@ -303,7 +308,7 @@ number-voters
 number-voters
 10
 100
-20.0
+63.0
 1
 1
 NIL
@@ -318,7 +323,7 @@ number-candidates
 number-candidates
 2
 10
-4.0
+5.0
 1
 1
 NIL
@@ -333,7 +338,7 @@ winning-candidates
 winning-candidates
 2
 number-candidates - 1
-3.0
+2.0
 1
 1
 NIL
@@ -347,7 +352,7 @@ CHOOSER
 election-type
 election-type
 "majority" "ranked-voting" "plurality" "limited"
-3
+2
 
 SLIDER
 19
@@ -358,7 +363,7 @@ dimensions
 dimensions
 2
 10
-4.0
+6.0
 1
 1
 NIL
@@ -373,7 +378,7 @@ repulsion-distance
 repulsion-distance
 1
 100
-40.0
+100.0
 1
 1
 NIL
@@ -388,7 +393,7 @@ movement-speed
 movement-speed
 0.1
 2
-0.9
+1.0
 0.1
 1
 NIL
@@ -403,7 +408,7 @@ change-satisfaction
 change-satisfaction
 0
 1
-0.2
+1.0
 0.1
 1
 NIL
@@ -464,7 +469,7 @@ allowed-votes-per-election
 allowed-votes-per-election
 0
 winning-candidates - 1
-2.0
+1.0
 1
 1
 NIL
