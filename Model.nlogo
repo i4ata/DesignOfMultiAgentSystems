@@ -17,10 +17,14 @@ globals
 [
   voter-turnout         ;; the percentage of voters that voted
   total-votes           ;; the total number of votes
+  seed                  ;; the random seed used for the run
 ]
 
 to setup
   clear-all
+  set seed new-seed
+  show seed
+  random-seed seed
 
   ;; if the candidates are created first, their 'who' values will start at 0
   ;; otherwise, they will start at `number-voters`, which would break everything
@@ -323,7 +327,7 @@ number-candidates
 number-candidates
 2
 10
-5.0
+10.0
 1
 1
 NIL
@@ -352,7 +356,7 @@ CHOOSER
 election-type
 election-type
 "majority" "ranked-voting" "plurality" "limited"
-2
+1
 
 SLIDER
 19
@@ -378,7 +382,7 @@ repulsion-distance
 repulsion-distance
 1
 100
-100.0
+80.0
 1
 1
 NIL
