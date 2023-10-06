@@ -1,0 +1,125 @@
+<mxfile host="Electron" modified="2023-09-19T13:21:36.410Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.7.5 Chrome/114.0.5735.289 Electron/25.8.1 Safari/537.36" etag="CRcPuWebKNL-NPvhLozN" version="21.7.5" type="device">
+  <diagram name="Seite-1" id="cMbaQcHFtbOXgnyD8tNQ">
+    <mxGraphModel dx="1221" dy="823" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-1" value="Voters and candidates are randomly placed in a non-wrapped environment (maybe try different random distributions?)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="349" width="130" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-2" value="Is multi-candidate district?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="347.5" y="610" width="131.5" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-3" value="Election begins, in which each voter:" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="354" y="140" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-4" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-1" target="JuxLxERAA1o7qZFkNtt9-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="450" y="450" as="sourcePoint" />
+            <mxPoint x="500" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-5" value="Decide the utility of each candidate to determine who to vote for. Utility will be computed by taking into account how close the candidate is to himself and after a certain treshhold distance the voter will have a negative utility towards that candidate due to too radical opinion differences. Furthermore the likelihood of winning for each candidate is taken into account. If utiliity is too low based on satisfaction trehold then this voter will not vote." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="341" y="220" width="146" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-6" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-3" target="JuxLxERAA1o7qZFkNtt9-5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="570" y="430" as="sourcePoint" />
+            <mxPoint x="620" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-7" value="Counts are given and counted based on the electoral system and winner/-s are determined, voter turnout recorded." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="353.25" y="505" width="120" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-8" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-5" target="JuxLxERAA1o7qZFkNtt9-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="450" as="sourcePoint" />
+            <mxPoint x="480" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-9" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-7" target="JuxLxERAA1o7qZFkNtt9-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="450" as="sourcePoint" />
+            <mxPoint x="480" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-10" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-2" target="JuxLxERAA1o7qZFkNtt9-12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="750" as="sourcePoint" />
+            <mxPoint x="414" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-11" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="JuxLxERAA1o7qZFkNtt9-10">
+          <mxGeometry x="-0.2001" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-12" value="Calculate happiness of all voters with all elected candidates, (maybe take the midpoint of all candidates position)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="354" y="820" width="120" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-13" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-2" target="JuxLxERAA1o7qZFkNtt9-14">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="500" y="680" as="sourcePoint" />
+            <mxPoint x="560" y="675" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-15" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="JuxLxERAA1o7qZFkNtt9-13">
+          <mxGeometry x="-0.1488" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-14" value="Calculate happiness of voters by taking the utility of the candidate as a basis and multiply with constant factor to produce happiness." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="626.25" width="120" height="117.5" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-16" value="Change overall happiness slightly towards the newly calculated happiness score." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="980" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-17" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-12" target="JuxLxERAA1o7qZFkNtt9-16">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="414" y="1000" as="sourcePoint" />
+            <mxPoint x="464" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-18" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-14" target="JuxLxERAA1o7qZFkNtt9-16">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="750" as="sourcePoint" />
+            <mxPoint x="480" y="700" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="620" y="950" />
+              <mxPoint x="570" y="950" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-19" value="Each voter moves toward their optimal position based on the expected utility of all candidates." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="1110" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-20" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-16" target="JuxLxERAA1o7qZFkNtt9-19">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="1050" as="sourcePoint" />
+            <mxPoint x="480" y="1000" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-21" value="New election cycle begins." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="1230" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-22" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-19" target="JuxLxERAA1o7qZFkNtt9-21">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="1150" as="sourcePoint" />
+            <mxPoint x="480" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="JuxLxERAA1o7qZFkNtt9-23" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="JuxLxERAA1o7qZFkNtt9-21" target="JuxLxERAA1o7qZFkNtt9-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="430" y="1150" as="sourcePoint" />
+            <mxPoint x="720" y="460" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="780" y="1260" />
+              <mxPoint x="780" y="120" />
+              <mxPoint x="414" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
