@@ -18,6 +18,7 @@ globals
   voter-turnout         ;; the percentage of voters that voted
   total-votes           ;; the total number of votes
   seed                  ;; the random seed used for the run
+  max-distance          ;; max distance given the environment
 ]
 
 to setup
@@ -25,6 +26,10 @@ to setup
   set seed new-seed
   show seed
   random-seed seed
+
+  set max-distance 0
+  repeat dimensions [set max-distance max-distance + world-width ^ 2]
+  set max-distance sqrt max-distance
 
   ;; if the candidates are created first, their 'who' values will start at 0
   ;; otherwise, they will start at `number-voters`, which would break everything
@@ -51,6 +56,11 @@ to setup
 
   set voter-turnout 0
   reset-ticks
+end
+
+;;only for testing (delete before final version)
+to test-distance
+  ask candidates [if calculate-satisfaction >= 0 [set color green]]
 end
 
 ;; run this inbetween elections
@@ -96,6 +106,17 @@ end
 to-report calculate-satisfaction
   let dist-val calculate-distance
   report ( repulsion-distance - dist-val ) / ( ( 1 + dist-val ) ^ 2 )
+end
+
+
+;; called for each candidate by each voter
+to-report calculate-normalized-satisfaction
+  let dist-val calculate-distance / max-distance
+  if dist-val = 0
+  [
+    report 100
+  ]
+  report (1 - dist-val) * 100
 end
 
 ;; called per voter
@@ -145,9 +166,9 @@ to vote
     let chosen-candidate candidates with [who = position max-utility own-utilities] ;; the 'who' of the candidate we are voting for is the argmax of the utilities
 
     ;; use satisfaction to determine if the voter votes for someone
-    let chosen-satisfaction first [calculate-satisfaction] of chosen-candidate
+    ;;let chosen-satisfaction first [calculate-satisfaction] of chosen-candidate
 
-    if chosen-satisfaction >= satisfaction
+    if max-utility >= (1 - satisfaction / 100) * max-utility-for-voting
     [
       ;; determine the candidate with the highest utility for this voter
        ask chosen-candidate [ set votes-received votes-received + 1 ]
@@ -167,7 +188,7 @@ to vote
     let best-n-candidates sublist candidates-ordered 0 allowed-votes-per-election
 
     ;; take only the candidates with which the voter is satisfied enough
-    let filtered-candidates filter [c -> item ([who] of c) utilities > satisfaction] best-n-candidates
+    let filtered-candidates filter [c -> item ([who] of c) utilities > (1 - satisfaction / 100) * max-utility-for-voting ] best-n-candidates
 
     ;; if there is someone to vote for, vote and increment the vote-turnout
     if not empty? filtered-candidates
@@ -185,7 +206,7 @@ to evaluate
   let winners candidates with [ winner? = true ]
 
   ;; calculate change in voter satisfaction for each winner
-  ask winners [ set newSatisfaction (calculate-satisfaction / winning-candidates) + newSatisfaction ]
+  ask winners [ set newSatisfaction (calculate-normalized-satisfaction / winning-candidates) + newSatisfaction ]
 
   set satisfaction satisfaction + (newSatisfaction - satisfaction) * change-satisfaction
 
@@ -195,11 +216,11 @@ end
 to-report calculate-direction-vector
 
   ;; my polposition - polposition
-  let direction-vector (map - ([polposition] of myself) polposition)
+  let direction-vector (map - polposition ([polposition] of myself))
 
   ;; add the x and y at the beginning
-  set direction-vector fput ([ycor] of myself - ycor) direction-vector
-  set direction-vector fput ([xcor] of myself - xcor) direction-vector
+  set direction-vector fput ( ycor - [ycor] of myself ) direction-vector
+  set direction-vector fput (xcor - [xcor] of myself ) direction-vector
 
   report direction-vector
 end
@@ -263,8 +284,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -310,9 +331,9 @@ SLIDER
 230
 number-voters
 number-voters
-10
+1
 100
-63.0
+100.0
 1
 1
 NIL
@@ -327,7 +348,7 @@ number-candidates
 number-candidates
 2
 10
-10.0
+2.0
 1
 1
 NIL
@@ -356,7 +377,7 @@ CHOOSER
 election-type
 election-type
 "majority" "ranked-voting" "plurality" "limited"
-1
+2
 
 SLIDER
 19
@@ -367,7 +388,7 @@ dimensions
 dimensions
 2
 10
-6.0
+2.0
 1
 1
 NIL
@@ -382,7 +403,7 @@ repulsion-distance
 repulsion-distance
 1
 100
-80.0
+12.0
 1
 1
 NIL
@@ -397,7 +418,7 @@ movement-speed
 movement-speed
 0.1
 2
-1.0
+0.2
 0.1
 1
 NIL
@@ -412,7 +433,7 @@ change-satisfaction
 change-satisfaction
 0
 1
-1.0
+0.5
 0.1
 1
 NIL
@@ -474,6 +495,21 @@ allowed-votes-per-election
 0
 winning-candidates - 1
 1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+279
+548
+451
+581
+max-utility-for-voting
+max-utility-for-voting
+1
+10
+2.0
 1
 1
 NIL
