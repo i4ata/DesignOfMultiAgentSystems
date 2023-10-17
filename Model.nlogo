@@ -58,11 +58,6 @@ to setup
   reset-ticks
 end
 
-;;only for testing (delete before final version)
-to test-distance
-  ask candidates [if calculate-satisfaction >= 0 [set color green]]
-end
-
 ;; run this inbetween elections
 to reset
 
